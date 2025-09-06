@@ -26,6 +26,10 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import android.view.WindowManager
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -53,10 +57,11 @@ import app.iv.utils.CopiableText
 import app.iv.utils.MediaInfoFormatter
 import app.iv.data.MediaStoreQuery
 import app.iv.data.MediaItem
+import app.iv.data.MediaType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MediaView(index: Int, folderId: Long) {
+fun MediaView(index: Int, folderId: Long, mediaType: MediaType, onBack: () -> Unit) {
 	val context = LocalContext.current
 	val coroutineScope = rememberCoroutineScope()
     var mediaItems by remember { mutableStateOf<List<MediaItem>>(emptyList()) }
@@ -75,7 +80,7 @@ fun MediaView(index: Int, folderId: Long) {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             coroutineScope.launch {
-                mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId)
+                mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId, mediaType)
             }
         }
     }
@@ -92,8 +97,8 @@ fun MediaView(index: Int, folderId: Long) {
         }
     }
     
-    LaunchedEffect(folderId) {
-        mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId)
+    LaunchedEffect(folderId, mediaType) {
+        mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId, mediaType)
     }
     
     LaunchedEffect(keepScreenOn) {
@@ -168,7 +173,19 @@ fun MediaView(index: Int, folderId: Long) {
 	    	
 	        TopAppBar(
     	        title = {},
+    	        navigationIcon = {
+    	        	IconButton(onClick = { onBack() }) {
+    	        		Icon(Icons.Default.Close, contentDescription = null)
+    	        	}
+    	        },
     	        actions = {
+    	        	IconButton(
+        	        	onClick = {
+        	        	    
+        	        	}
+    	        	) {
+    	        		Icon(Icons.Default.Edit, contentDescription = null)
+    	        	}
     	            FilledIconToggleButton(
     	                checked = keepScreenOn,
     	                onCheckedChange = { checked -> keepScreenOn = checked }
