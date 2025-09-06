@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilledIconToggleButton
@@ -58,7 +60,7 @@ import app.iv.data.MediaType
 
 @OptIn(ExperimentalMaterial3Api::class,ExperimentalFoundationApi::class)
 @Composable
-fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit, mediaType: MediaType) {
+fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int, MediaType) -> Unit, mediaType: MediaType, onBack: () -> Unit) {
     val context = LocalContext.current
     var mediaItems by remember { mutableStateOf<List<MediaItem>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -104,6 +106,11 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit
     		    } else {
     		        Text(folderName)
     		    }
+    		},
+    		navigationIcon = {
+    			IconButton(onClick = { onBack() }) {
+    				Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
+    			}
     		},
     		actions = {
     		    if(isSelectionMode) {
@@ -167,7 +174,7 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit
                                         selectedItemIds += item.id
                                     }
                                 } else {
-                                    toMediaView(index)
+                                    toMediaView(index, mediaType)
                                 }
                             }
                         )
@@ -205,7 +212,8 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(32.dp)
                                 )
                             }
                         }
