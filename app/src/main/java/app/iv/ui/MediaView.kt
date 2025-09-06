@@ -45,8 +45,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 
 
-//import net.engawapg.lib.zoomable.rememberZoomState
-//import net.engawapg.lib.zoomable.zoomable
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 
 
 import app.iv.utils.CopiableText
@@ -128,7 +128,7 @@ fun MediaView(index: Int, folderId: Long) {
 	) {
 	    HorizontalPager(state = state) { page ->
 	        val item = mediaItems[page]
-	        // val zoomState = rememberZoomState()
+	        val zoomState = rememberZoomState()
 	        if(item.mimeType.startsWith("video/")) {
 	            VideoPlayer(
 	                uri = item.uri,
@@ -152,13 +152,13 @@ fun MediaView(index: Int, folderId: Long) {
 	                model = item.uri,
 	                contentDescription = null,
 	                modifier = Modifier
-	                	.fillMaxSize(),
-	                	/*.zoomable(
+	                	.fillMaxSize()
+	                	.zoomable(
     	                	zoomState = zoomState,
     	                	onTap = {
     	                	    isToolbarVisible = !isToolbarVisible
     	                	}
-	                	),*/
+	                	),
 	                contentScale = ContentScale.Fit
 	            )
 	        }
