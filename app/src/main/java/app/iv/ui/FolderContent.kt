@@ -54,10 +54,11 @@ import coil.request.videoFramePercent
 import app.iv.utils.MediaInfoFormatter
 import app.iv.data.MediaStoreQuery
 import app.iv.data.MediaItem
+import app.iv.data.MediaType
 
 @OptIn(ExperimentalMaterial3Api::class,ExperimentalFoundationApi::class)
 @Composable
-fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit) {
+fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit, mediaType: MediaType) {
     val context = LocalContext.current
     var mediaItems by remember { mutableStateOf<List<MediaItem>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -73,7 +74,7 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit
             isSelectionMode = false
             selectedItemIds = emptySet()
             coroutineScope.launch {
-                mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId)
+                mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId, mediaType)
             }
         }
     }
@@ -83,9 +84,9 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit
         selectedItemIds = emptySet()
     }
     
-    LaunchedEffect(folderId) {
+    LaunchedEffect(folderId, mediaType) {
         isLoading = true
-        mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId)
+        mediaItems = MediaStoreQuery(context).queryMediaItemsInFolder(folderId, mediaType)
         isLoading = false
     }
     
@@ -204,7 +205,7 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int) -> Unit
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
