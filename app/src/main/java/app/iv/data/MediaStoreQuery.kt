@@ -27,9 +27,15 @@ data class MediaItem(
     val height: Int
 )
 
+enum class MediaType {
+    ALL,
+    IMAGE,
+    VIDEO
+}
+
 class MediaStoreQuery(private val context: Context) {
 	
-    suspend fun queryMediaFolders(): List<Folder> = withContext(Dispatchers.IO) {
+    suspend fun queryMediaFolders(mediaType: MediaType): List<Folder> = withContext(Dispatchers.IO) {
         val folders = mutableMapOf<Long, Folder>()
         val contentUri = MediaStore.Files.getContentUri("external")
 
@@ -40,11 +46,23 @@ class MediaStoreQuery(private val context: Context) {
             MediaStore.Files.FileColumns.MEDIA_TYPE
         )
         
-        val selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?, ?)"
-        val selectionArgs = arrayOf(
-            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
-            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
-        )
+        val (selection, selectionArgs) = when (mediaType) {
+            MediaType.IMAGE -> Pair(
+                "${MediaStore.Files.FileColumns.MEDIA_TYPE} = ?",
+                arrayOf(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString())
+            )
+            MediaType.VIDEO -> Pair(
+                "${MediaStore.Files.FileColumns.MEDIA_TYPE} = ?",
+                arrayOf(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString())
+            )
+            MediaType.ALL -> Pair(
+                "${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?, ?)",
+                arrayOf(
+                    MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
+                    MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
+                )
+            )
+        }
         
         val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
 
@@ -64,9 +82,9 @@ class MediaStoreQuery(private val context: Context) {
                 val bucketId = cursor.getLong(bucketIdColumn)
                 val bucketName = cursor.getString(bucketNameColumn) ?: "Unknown"
                 val mediaId = cursor.getLong(idColumn)
-                val mediaType = cursor.getInt(mediaTypeColumn)
+                val type = cursor.getInt(mediaTypeColumn)
 
-                val itemUri = if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                val itemUri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                     ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mediaId)
                 } else {
                     ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, mediaId)
@@ -81,7 +99,7 @@ class MediaStoreQuery(private val context: Context) {
         return@withContext folders.values.toList()
     }
     
-    suspend fun queryMediaItems(bucketId: Long? = null): List<MediaItem> = withContext(Dispatchers.IO) {
+    suspend fun queryMediaItems(bucketId: Long? = null, mediaType: MediaType = MediaType.ALL): List<MediaItem> = withContext(Dispatchers.IO) {
         val mediaItems = mutableListOf<MediaItem>()
         val contentUri = MediaStore.Files.getContentUri("external")
 
@@ -97,11 +115,24 @@ class MediaStoreQuery(private val context: Context) {
             MediaStore.Video.Media.DURATION
         )
 
-        val selectionClauses = mutableListOf("${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?, ?)")
-        val selectionArgsList = mutableListOf(
-            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
-            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
-        )
+        val selectionClauses = mutableListOf<String>()
+        val selectionArgsList = mutableListOf<String>()
+        
+        when (mediaType) {
+            MediaType.IMAGE -> {
+                selectionClauses.add("${MediaStore.Files.FileColumns.MEDIA_TYPE} = ?")
+                selectionArgsList.add(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString())
+            }
+            MediaType.VIDEO -> {
+                selectionClauses.add("${MediaStore.Files.FileColumns.MEDIA_TYPE} = ?")
+                selectionArgsList.add(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString())
+            }
+            MediaType.ALL -> {
+                selectionClauses.add("${MediaStore.Files.FileColumns.MEDIA_TYPE} IN (?, ?)")
+                selectionArgsList.add(MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString())
+                selectionArgsList.add(MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString())
+            }
+        }
 
         bucketId?.let {
             selectionClauses.add("${MediaStore.Files.FileColumns.BUCKET_ID} = ?")
@@ -131,15 +162,15 @@ class MediaStoreQuery(private val context: Context) {
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
-                val mediaType = cursor.getInt(mediaTypeColumn)
+                val type = cursor.getInt(mediaTypeColumn)
 
-                val uri = if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                val uri = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
                     ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
                 } else {
                     ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
                 }
                 
-                val duration = if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                val duration = if (type == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
                     cursor.getLong(durationColumn)
                 } else {
                     0L
@@ -163,9 +194,9 @@ class MediaStoreQuery(private val context: Context) {
         return@withContext mediaItems
     }
 
-    suspend fun queryAllMediaItems(): List<MediaItem> = queryMediaItems(null)
+    suspend fun queryAllMediaItems(mediaType: MediaType = MediaType.ALL): List<MediaItem> = queryMediaItems(null, mediaType)
 
-    suspend fun queryMediaItemsInFolder(folderId: Long): List<MediaItem> = queryMediaItems(folderId)
+    suspend fun queryMediaItemsInFolder(folderId: Long, mediaType: MediaType = MediaType.ALL): List<MediaItem> = queryMediaItems(folderId, mediaType)
     
     fun deleteMediaItems(uris: List<Uri>): IntentSender {
         return MediaStore.createDeleteRequest(context.contentResolver, uris).intentSender
