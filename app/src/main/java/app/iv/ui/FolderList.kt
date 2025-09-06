@@ -1,6 +1,7 @@
 package app.iv.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.videoFramePercent
@@ -59,6 +63,13 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
             MediaType.VIDEO -> "Videos"
         }
     }
+    
+    val checkIcon = @Composable {
+	    Icon(
+	        imageVector = Icons.Default.Check,
+	        contentDescription = null
+	    )
+	}
 
     Column {
         TopAppBar(
@@ -67,7 +78,9 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
                     Text(selectedFilter)
                     DropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier.padding(end = 24.dp)
                     ) {
                         DropdownMenuItem(
                             text = { Text("Default") },
@@ -75,6 +88,9 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
                                 SharedPreferencesUtil.saveFilter(context, MediaType.ALL)
                                 filterType = MediaType.ALL
                                 expanded = false
+                            },
+                            leadingIcon = {
+                            	if(filterType == MediaType.ALL) checkIcon()
                             }
                         )
                         DropdownMenuItem(
@@ -83,6 +99,9 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
                                 SharedPreferencesUtil.saveFilter(context, MediaType.IMAGE)
                                 filterType = MediaType.IMAGE
                                 expanded = false
+                            },
+                            leadingIcon = {
+                            	if(filterType == MediaType.IMAGE) checkIcon()
                             }
                         )
                         DropdownMenuItem(
@@ -91,6 +110,9 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
                                 SharedPreferencesUtil.saveFilter(context, MediaType.VIDEO)
                                 filterType = MediaType.VIDEO
                                 expanded = false
+                            },
+                            leadingIcon = {
+                            	if(filterType == MediaType.VIDEO) checkIcon()
                             }
                         )
                     }
@@ -112,7 +134,7 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
                             .data(folder.thumbnailUri)
                             .videoFramePercent(0.5)
                             .build(),
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(width = 82.dp, height = 50.dp),
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
