@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import app.iv.ui.FolderList
 import app.iv.ui.FolderContent
 import app.iv.ui.MediaView
+import app.iv.data.MediaType
 
 @Composable
 fun NavGraph() {
@@ -26,26 +27,31 @@ fun NavGraph() {
 		    route = "folder_list"
 		) {
 			FolderList(
-			    toFolderContent = { folderId, folderName ->
-			    	navController.navigate("folder_content/$folderId/$folderName")
+			    toFolderContent = { folderId, folderName, mediaType ->
+			    	navController.navigate("folder_content/$folderId/$folderName/$mediaType")
 			    }
 			)
 		}
 		composable(
-		    route = "folder_content/{folderId}/{folderName}",
+		    route = "folder_content/{folderId}/{folderName}/{mediaType}",
 		    arguments = listOf(
 		        navArgument("folderId") { type = NavType.LongType },
-		        navArgument("folderName") { type = NavType.StringType }
+		        navArgument("folderName") { type = NavType.StringType },
+		        navArgument("mediaType") { type = NavType.StringType }
 		    )
 		) { backStackEntry ->
 			val folderId = backStackEntry.arguments!!.getLong("folderId")
 			val folderName = backStackEntry.arguments!!.getString("folderName")!!
+			val mediaTypeString = backStackEntry.arguments!!.getString("mediaType")!!
+			val mediaType = MediaType.valueOf(mediaTypeString)
+			
 			FolderContent(
 			    folderId = folderId,
 			    folderName = folderName,
 			    toMediaView = { index ->
 			    	navController.navigate("media_view/$index/$folderId")
-			    }
+			    },
+			    mediaType = mediaType
 			)
 		}
 		composable(
