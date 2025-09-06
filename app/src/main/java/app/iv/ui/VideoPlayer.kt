@@ -39,7 +39,7 @@ fun VideoPlayer(
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
     var wasPlaying by remember { mutableStateOf(isUserPlaying) }
 
-    /*DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
@@ -59,7 +59,7 @@ fun VideoPlayer(
             exoPlayer.release()
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
-    }*/
+    }
 
     LaunchedEffect(uri) {
         val item = MediaItem.fromUri(uri)
