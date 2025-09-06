@@ -17,6 +17,7 @@ import app.iv.data.MediaType
 @Composable
 fun NavGraph() {
 	val navController = rememberNavController()
+	val onBack:() -> Unit = { navController.popBackStack() }
 	NavHost(
 	    navController = navController,
 	    startDestination = "folder_list",
@@ -48,14 +49,15 @@ fun NavGraph() {
 			FolderContent(
 			    folderId = folderId,
 			    folderName = folderName,
-			    toMediaView = { index ->
-			    	navController.navigate("media_view/$index/$folderId")
+			    toMediaView = { index, mediaType ->
+			    	navController.navigate("media_view/$index/$folderId/$mediaType")
 			    },
-			    mediaType = mediaType
+			    mediaType = mediaType,
+			    onBack = onBack
 			)
 		}
 		composable(
-		    route = "media_view/{index}/{folderId}",
+		    route = "media_view/{index}/{folderId}/{mediaType}",
 		    arguments = listOf(
 		        navArgument("index") { type = NavType.IntType },
 		        navArgument("folderId") { type = NavType.LongType }
@@ -63,9 +65,13 @@ fun NavGraph() {
 		) { backStackEntry ->
 			val index = backStackEntry.arguments!!.getInt("index")
 			val folderId = backStackEntry.arguments!!.getLong("folderId")
+			val mediaTypeString = backStackEntry.arguments!!.getString("mediaType")!!
+			val mediaType = MediaType.valueOf(mediaTypeString)
 			MediaView(
 			    index = index,
-			    folderId = folderId
+			    folderId = folderId,
+			    mediaType = mediaType,
+			    onBack = onBack
 			)
 		}
 	}
