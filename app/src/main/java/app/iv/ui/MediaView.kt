@@ -188,7 +188,11 @@ fun MediaView(index: Int, folderId: Long, mediaType: MediaType, onBack: () -> Un
     	        	}
     	            FilledIconToggleButton(
     	                checked = keepScreenOn,
-    	                onCheckedChange = { checked -> keepScreenOn = checked }
+    	                onCheckedChange = { checked -> keepScreenOn = checked },
+    	                colors = IconButtonDefaults.filledIconToggleButtonColors(
+    	                	containerColor = Color.Transparent,
+    	                	checkedContentColor = MaterialTheme.colorScheme.onPrimary
+    	                )
     	            ) {
     	                Icon(Icons.Default.Coffee, contentDescription = null)
     	            }
@@ -202,7 +206,8 @@ fun MediaView(index: Int, folderId: Long, mediaType: MediaType, onBack: () -> Un
     	                if(showDropdownMenu) {
                 	        DropdownMenu(
                 	            expanded = showDropdownMenu,
-                	            onDismissRequest = { showDropdownMenu = false }
+                	            onDismissRequest = { showDropdownMenu = false },
+                	            shape = MaterialTheme.shapes.large
                 	        ) {
                 	            DropdownMenuItem(
                 	                text = { Text(text = "Delete", color = MaterialTheme.colorScheme.error) },
