@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -126,7 +127,7 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int, MediaTy
 				        }
 				    ) {
 				        Icon(
-				            imageVector = Icons.Default.Check,
+				            imageVector = Icons.Default.SelectAll,
 				            contentDescription = "Toggle select all"
 				        )
 				    }
@@ -161,6 +162,7 @@ fun FolderContent(folderId: Long, folderName: String, toMediaView: (Int, MediaTy
                     Box(
                     modifier = Modifier
                         .aspectRatio(1f)
+                        .padding(1.dp)
                         .combinedClickable(
                             onLongClick = {
                                 isSelectionMode = true
