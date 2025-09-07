@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -74,8 +75,15 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
     Column {
         TopAppBar(
             title = {
-                Box(modifier = Modifier.clickable { expanded = true }) {
+                Row(
+	                modifier = Modifier.clickable { expanded = true },
+	                verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(selectedFilter)
+                    Icon(
+		                imageVector = Icons.Default.ArrowDropDown,
+		                contentDescription = "Filter options"
+		            )
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
@@ -124,7 +132,7 @@ fun FolderList(toFolderContent: (Long, String, MediaType) -> Unit) {
             items(folders) { folder ->
                 Row(
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(2.dp)
                         .fillMaxWidth()
                         .clickable { toFolderContent(folder.id, folder.name, filterType) },
                     verticalAlignment = Alignment.CenterVertically
